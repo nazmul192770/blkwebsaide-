@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Shadow Team Portal</title>
+<style>
+body { margin:0; font-family: Arial,sans-serif; background:#000; color:#fff; }
+header { background: linear-gradient(90deg,#111,#222); padding:20px; text-align:center; border-bottom:3px solid crimson;}
+h1 { margin:0; color:crimson; letter-spacing:2px; }
+.container { width:90%; max-width:600px; margin:20px auto; background:#111; padding:20px; border-radius:10px; box-shadow:0 0 10px crimson; }
+input, button { width:100%; padding:12px; margin:10px 0; border-radius:5px; border:none; font-size:16px; }
+input { background:#222; color:#fff; }
+button { background:crimson; color:#fff; font-weight:bold; cursor:pointer; }
+button:hover { background:#ff4444; }
+.section-title { color:crimson; text-align:center; margin-bottom:15px; }
+.member-card { background:#141414; border:1px solid #444; border-radius:10px; padding:10px; margin:10px 0; }
+.member-card h3 { margin:5px 0; color:#ffdd00; }
+.member-card p { margin:0; font-size:14px; color:#ccc; }
+.hide { display:none; }
+.footer { text-align:center; margin-top:20px; font-size:12px; color:#aaa; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>Black Shadow Team Portal</h1>
+</header>
+
+<!-- Login Section -->
+<div class="container" id="loginDiv">
+<h2 class="section-title">Login</h2>
+<input type="text" id="loginUsername" placeholder="Username">
+<input type="password" id="loginPassword" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="loginMsg" style="color:red;"></p>
+</div>
+
+<!-- Signup / Join Request Section -->
+<div class="container hide" id="signupDiv">
+<h2 class="section-title">Join Request</h2>
+<input type="text" id="newName" placeholder="Full Name">
+<input type="email" id="newEmail" placeholder="Email (Gmail)">
+<button onclick="submitRequest()">Submit Request</button>
+<p id="signupMsg" style="color:lightgreen;"></p>
+</div>
+
+<!-- Admin Approval Panel -->
+<div class="container hide" id="adminDiv">
+<h2 class="section-title">Admin Approval Panel</h2>
+<div id="requestsList"></div>
+</div>
+
+<!-- Members List -->
+<div class="container hide" id="membersDiv">
+<h2 class="section-title">Team Members</h2>
+<div id="memberList"></div>
+</div>
+
+<div class="footer">
+© 2025 Black Shadow Team
+</div>
+
+<script>
+// ======= Data =======
+let members = [
+  {name:"MD Zahid Hasan", role:"Commander", email:"commander@example.com"},
+  {name:"MD Nazmul Hossain Ekbal", role:"Assistant Commander", email:"assistant@example.com"}
+];
+let requests = [];
+
+// ======= Login =======
+function login() {
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+
+  if(username==="boss" && password==="blackshadow123") {
+    showAllPanels();
+  } else if(username==="commander" && password==="commander123") {
+    showMemberPanel("Commander");
+    alert("Logged in as Commander");
+  } else if(username==="assistant" && password==="assistant123") {
+    showMemberPanel("Assistant Commander");
+    alert("Logged in as Assistant Commander");
+  } else {
+    msg.innerText="Invalid credentials!";
+  }
+}
+
+// ======= Panel display functions =======
+function showAllPanels() {
+  document.getElementById('loginDiv').classList.add('hide');
+  document.getElementById('signupDiv').classList.remove('hide');
+  document.getElementById('adminDiv').classList.remove('hide');
+  document.getElementById('membersDiv').classList.remove('hide');
+  renderMembers();
+  renderRequests();
+}
+
+function showMemberPanel(role) {
+  document.getElementById('loginDiv').classList.add('hide');
+  document.getElementById('signupDiv').classList.add('hide'); // members cannot signup
+  document.getElementById('adminDiv').classList.add('hide');  // hide admin panel
+  document.getElementById('membersDiv').classList.remove('hide');
+  renderMembers(role);
+}
+
+// ======= Submit Join Request =======
+function submitRequest() {
+  const name = document.getElementById('newName').value;
+  const email = document.getElementById('newEmail').value;
+  const msg = document.getElementById('signupMsg');
+
+  if(name && email) {
+    requests.push({name:name, email:email});
+    msg.innerText="Request submitted! Waiting for approval.";
+    document.getElementById('newName').value="";
+    document.getElementById('newEmail').value="";
+    renderRequests();
+  } else {
+    msg.innerText="Please fill all fields.";
+  }
+}
+
+// ======= Render Requests =======
+function renderRequests() {
+  const listDiv = document.getElementById('requestsList');
+  listDiv.innerHTML="";
+  requests.forEach((req,index)=>{
+    const div = document.createElement('div');
+    div.className="member-card";
+    div.innerHTML=`<h3>${req.name}</h3><p>${req.email}</p><button onclick="approveRequest(${index})">Approve</button>`;
+    listDiv.appendChild(div);
+  });
+}
+
+// ======= Approve Request =======
+function approveRequest(index) {
+  const approved = requests.splice(index,1)[0];
+  members.push({name:approved.name, role:"Member", email:approved.email});
+  alert(`${approved.name} has been approved! Notification sent.`);
+  renderRequests();
+  renderMembers();
+}
+
+// ======= Render Members =======
+function renderMembers(viewRole) {
+  const listDiv = document.getElementById('memberList');
+  listDiv.innerHTML="";
+
+  // Commander
+  members.filter(m=>m.role==="Commander").forEach(mem=>{
+    const div = document.createElement('div');
+    div.className="member-card";
+    div.innerHTML=`<h3>${mem.name}</h3><p style="color:crimson;">${mem.role}</p><p>${mem.email}</p>`;
+    listDiv.appendChild(div);
+  });
+
+  // Assistant Commander
+  members.filter(m=>m.role==="Assistant Commander").forEach(mem=>{
+    const div = document.createElement('div');
+    div.className="member-card";
+    div.innerHTML=`<h3>${mem.name}</h3><p style="color:orange;">${mem.role}</p><p>${mem.email}</p>`;
+    listDiv.appendChild(div);
+  });
+
+  // Members
+  members.filter(m=>m.role==="Member").forEach(mem=>{
+    const div = document.createElement('div');
+    div.className="member-card";
+    div.innerHTML=`<h3>${mem.name}</h3><p style="color:#fff;">${mem.role}</p><p>${mem.email}</p>`;
+    listDiv.appendChild(div);
+  });
+
+  // Optional: restrict view for Commander/Assistant
+  if(viewRole==="Commander" || viewRole==="Assistant Commander") {
+    document.getElementById('requestsList').innerHTML=""; // hide pending requests
+  }
+}
+</script>
+
+</body>
+</html>
+
+
